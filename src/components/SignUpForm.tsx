@@ -6,9 +6,9 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 
 const SignupSchema = Yup.object().shape({
-  email: Yup.string().email("Invalid email").required("Required"),
-  username: Yup.string().required("Required"),
-  password: Yup.string().required("Required"),
+  email: Yup.string().email("invalid email").required("email is required"),
+  username: Yup.string().required("username is required"),
+  password: Yup.string().required("password is required"),
 });
 
 export const SignupForm: React.FC = () => {
@@ -29,10 +29,8 @@ export const SignupForm: React.FC = () => {
         values.username
       );
       if (response.session) {
-        // Handle successful signup, e.g., redirect or show message
         setSession(response.session);
         navigate("/dashboard");
-        console.log("User successfully signed up!");
       } else {
         console.error(response);
       }
@@ -41,40 +39,54 @@ export const SignupForm: React.FC = () => {
 
   return (
     <form onSubmit={formik.handleSubmit}>
-      <input
-        type="email"
-        name="email"
-        onChange={formik.handleChange}
-        value={formik.values.email}
-        placeholder="Email"
-      />
-      {formik.errors.email && formik.touched.email ? (
-        <div>{formik.errors.email}</div>
-      ) : null}
+      <div className="flex flex-col items-center">
+        <input
+          type="email"
+          name="email"
+          onChange={formik.handleChange}
+          value={formik.values.email}
+          placeholder="email"
+          className="px-4 py-2 border rounded mb-2 mt-48"
+        />
+        {formik.errors.email && formik.touched.email ? (
+          <div className="text-red-600 mb-2 text-sm">{formik.errors.email}</div>
+        ) : null}
 
-      <input
-        type="text"
-        name="username"
-        onChange={formik.handleChange}
-        value={formik.values.username}
-        placeholder="Username"
-      />
-      {formik.errors.username && formik.touched.username ? (
-        <div>{formik.errors.username}</div>
-      ) : null}
+        <input
+          type="text"
+          name="username"
+          onChange={formik.handleChange}
+          value={formik.values.username}
+          placeholder="username"
+          className="px-4 py-2 border rounded mb-2"
+        />
+        {formik.errors.username && formik.touched.username ? (
+          <div className="text-red-600 mb-2 text-sm">
+            {formik.errors.username}
+          </div>
+        ) : null}
 
-      <input
-        type="password"
-        name="password"
-        onChange={formik.handleChange}
-        value={formik.values.password}
-        placeholder="Password"
-      />
-      {formik.errors.password && formik.touched.password ? (
-        <div>{formik.errors.password}</div>
-      ) : null}
+        <input
+          type="password"
+          name="password"
+          onChange={formik.handleChange}
+          value={formik.values.password}
+          placeholder="password"
+          className="px-4 py-2 border rounded mb-2"
+        />
+        {formik.errors.password && formik.touched.password ? (
+          <div className="text-red-600 mb-4 text-sm">
+            {formik.errors.password}
+          </div>
+        ) : null}
 
-      <button type="submit">Sign Up</button>
+        <button
+          type="submit"
+          className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-800 mt-2"
+        >
+          sign up
+        </button>
+      </div>
     </form>
   );
 };

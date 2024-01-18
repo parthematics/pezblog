@@ -97,3 +97,20 @@ export async function getAllEntries(userId: string) {
     .eq("user_auth_id", userId);
   return { data, error };
 }
+
+export async function deleteEntry(entryId: number) {
+  const { data, error } = await supabase
+    .from("entries")
+    .delete()
+    .eq("id", entryId);
+  return { data, error };
+}
+
+export async function getUser(userId: string) {
+  const { data, error } = await supabase
+    .from("users")
+    .select()
+    .eq("auth_id", userId)
+    .single();
+  return { data, error };
+}
