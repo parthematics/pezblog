@@ -9,22 +9,26 @@ const Navbar: React.FC = () => {
     <nav className="flex justify-between items-center p-4 bg-gray-800 text-white">
       <Link to="/">pezblog</Link>
       <div>
-        <Link to="/" className="mr-4">
-          login
-        </Link>
-        <Link to="/signup" className="mr-4">
-          signup
-        </Link>
-        <Link to="/dashboard" className="mr-4">
-          dashboard
-        </Link>
+        {!session?.user?.id ? (
+          <Link to="/" className="mr-4">
+            login
+          </Link>
+        ) : null}
+        {!session?.user?.id ? (
+          <Link to="/signup" className="mr-4">
+            signup
+          </Link>
+        ) : null}
+        {session?.user?.id ? (
+          <Link to="/dashboard" className="mr-4">
+            dashboard
+          </Link>
+        ) : null}
         {session?.user?.id ? (
           <Link to="/" className="mr-4" onClick={() => logout()}>
             logout
           </Link>
-        ) : (
-          ""
-        )}
+        ) : null}
       </div>
     </nav>
   );

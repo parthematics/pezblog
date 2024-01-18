@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "../supabase";
 
@@ -13,7 +19,18 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<Session | null>(() => {
+    const savedSession = localStorage.getItem("session");
+    return savedSession ? JSON.parse(savedSession) : null;
+  });
+
+  useEffect(() => {
+    if (session) {
+      localStorage.setItem("session", JSON.stringify(session));
+    } else {
+      localStorage.removeItem("session");
+    }
+  }, [session]);
 
   const logout = async () => {
     const { error } = await supabase.auth.signOut();

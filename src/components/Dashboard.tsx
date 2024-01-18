@@ -5,6 +5,8 @@ import {
   getAllEntries,
   getUser,
   deleteEntry,
+  makeEntryPublic,
+  associateEntryWithSharedUid,
 } from "../supabase/service";
 import { BlogEntry, User } from "../supabase";
 
@@ -65,8 +67,8 @@ export const Dashboard: React.FC = () => {
     } else {
       if (data && data[0]) {
         setEntries([data[0], ...entries]);
-        setNewEntryTitle(data[0].title ?? "");
-        setNewEntryContent(data[0].content ?? "");
+        setNewEntryTitle("");
+        setNewEntryContent("");
       }
     }
   };
@@ -81,6 +83,36 @@ export const Dashboard: React.FC = () => {
         console.error("Error deleting entry:", error);
       } else {
         setEntries(entries.filter((entry) => entry.id !== entryId));
+      }
+    }
+  };
+
+  const handleShareEntry = async (entryId: number) => {
+    const { error: publicError } = await makeEntryPublic(entryId);
+    if (publicError) {
+      console.error("Error marking entry as public: ", publicError);
+    } else {
+      const baseUrl = `${window.location.protocol}//${window.location.host}`;
+      const sharingUid = Math.random().toString(36).substr(2, 13);
+      const { error: sharingError } = await associateEntryWithSharedUid(
+        sharingUid,
+        entryId
+      );
+      if (sharingError) {
+        console.error(
+          "Error associating entry with sharing uid: ",
+          sharingError
+        );
+      } else {
+        const shareableLink = `${baseUrl}/dashboard/entry/${sharingUid}`;
+        navigator.clipboard.writeText(shareableLink).then(
+          () => {
+            alert("link copied to clipboard!");
+          },
+          (err) => {
+            console.error("Could not copy link: ", err);
+          }
+        );
       }
     }
   };
@@ -149,6 +181,12 @@ export const Dashboard: React.FC = () => {
               {entry.content}
             </p>
             <div className="flex justify-end">
+              <button
+                onClick={() => handleShareEntry(entry.id)}
+                className="text-blue-600 hover:text-blue-800 text-sm pr-2"
+              >
+                share
+              </button>
               <button
                 onClick={() => handleDeleteEntry(entry.id)}
                 className="text-red-600 hover:text-red-800 text-sm"

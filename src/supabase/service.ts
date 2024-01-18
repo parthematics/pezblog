@@ -98,6 +98,15 @@ export async function getAllEntries(userId: string) {
   return { data, error };
 }
 
+export async function getEntry(entryId: number) {
+  const { data, error } = await supabase
+    .from("entries")
+    .select()
+    .eq("id", entryId)
+    .single();
+  return { data, error };
+}
+
 export async function deleteEntry(entryId: number) {
   const { data, error } = await supabase
     .from("entries")
@@ -113,4 +122,37 @@ export async function getUser(userId: string) {
     .eq("auth_id", userId)
     .single();
   return { data, error };
+}
+
+export async function makeEntryPublic(entryId: number) {
+  const { data, error } = await supabase
+    .from("entries")
+    .update({ is_private: false })
+    .eq("id", entryId);
+  return { data, error };
+}
+
+export async function associateEntryWithSharedUid(
+  sharingUid: string,
+  entryId: number
+) {
+  const { data, error } = await supabase
+    .from("shared_entries")
+    .insert({ uid: sharingUid, entry_id: entryId })
+    .select();
+  return { data, error };
+}
+
+export async function getEntryUsingSharedUid(sharingUid: string) {
+  const { data, error } = await supabase
+    .from("shared_entries")
+    .select("entry_id")
+    .eq("uid", sharingUid)
+    .single();
+
+  if (!error) {
+    return await getEntry(data?.entry_id ?? 0);
+  } else {
+    return { data: null, error };
+  }
 }

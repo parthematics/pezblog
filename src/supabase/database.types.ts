@@ -14,32 +14,58 @@ export interface Database {
           content: string | null
           created_at: string
           id: number
+          is_private: boolean
           last_updated_at: string | null
           title: string | null
-          user_id: number | null
+          user_auth_id: string | null
         }
         Insert: {
           content?: string | null
           created_at?: string
           id?: number
+          is_private?: boolean
           last_updated_at?: string | null
           title?: string | null
-          user_id?: number | null
+          user_auth_id?: string | null
         }
         Update: {
           content?: string | null
           created_at?: string
           id?: number
+          is_private?: boolean
           last_updated_at?: string | null
           title?: string | null
-          user_id?: number | null
+          user_auth_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "entries_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "entries_user_auth_id_fkey"
+            columns: ["user_auth_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["auth_id"]
+          }
+        ]
+      }
+      shared_entries: {
+        Row: {
+          entry_id: number | null
+          uid: string
+        }
+        Insert: {
+          entry_id?: number | null
+          uid: string
+        }
+        Update: {
+          entry_id?: number | null
+          uid?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_entries_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
             referencedColumns: ["id"]
           }
         ]

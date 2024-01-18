@@ -5,6 +5,7 @@ import { SignupForm } from "./components/SignUpForm";
 import { LoginForm } from "./components/LoginForm";
 import { Dashboard } from "./components/Dashboard";
 import { AuthProvider } from "./components/AuthContext";
+import { PublicEntry } from "./components/PublicEntry";
 
 function App() {
   return (
@@ -15,6 +16,10 @@ function App() {
           <Route path="/" element={<LoginForm />} />
           <Route path="/signup" element={<SignupForm />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route
+            path="/dashboard/entry/:sharingUid"
+            element={<PublicEntry />}
+          />
         </Routes>
       </Router>
     </AuthProvider>
