@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getEntryUsingSharedUid, getUser } from "../supabase/service";
-import { BlogEntry, User } from "../supabase";
+import { BlogEntry } from "../supabase";
+import { supabase } from "../supabase";
 
 export const PublicEntry: React.FC = () => {
   const { sharingUid } = useParams();
   const [entry, setEntry] = useState<BlogEntry | null>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<{ username: string | null } | null>(null);
 
   useEffect(() => {
     const fetchEntry = async () => {
@@ -18,7 +19,12 @@ export const PublicEntry: React.FC = () => {
         } else if (data?.is_private === true) {
           return <div>you do not have access to this entry.</div>;
         } else {
-          const { data: user, error } = await getUser(data?.user_auth_id ?? "");
+          const { data: user, error } = await supabase
+            .from("users")
+            .select("username")
+            .eq("auth_id", data?.user_auth_id ?? "")
+            .single();
+
           if (error) {
             console.error("Error fetching user: ", error);
           } else {
