@@ -156,3 +156,23 @@ export async function getEntryUsingSharedUid(sharingUid: string) {
     return { data: null, error };
   }
 }
+
+export async function emailExists(email: string) {
+  const { error } = await supabase
+    .from("users")
+    .select("email")
+    .eq("email", email)
+    .single();
+
+  return error ? false : true;
+}
+
+export async function usernameExists(username: string) {
+  const { error } = await supabase
+    .from("users")
+    .select("username")
+    .eq("username", username)
+    .single();
+
+  return error ? false : true;
+}

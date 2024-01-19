@@ -1,7 +1,7 @@
 import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { signUp } from "../supabase";
+import { signUp, emailExists, usernameExists } from "../supabase";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 
@@ -22,17 +22,30 @@ export const SignupForm: React.FC = () => {
       password: "",
     },
     validationSchema: SignupSchema,
-    onSubmit: async (values) => {
-      const response = await signUp(
-        values.email,
-        values.password,
-        values.username
-      );
-      if (response.session) {
-        setSession(response.session);
-        navigate("/dashboard");
-      } else {
-        console.error(response);
+    onSubmit: async (values, { setFieldError }) => {
+      const emailInUse = await emailExists(values.email);
+      const usernameInUse = await usernameExists(values.username);
+
+      if (emailInUse) {
+        setFieldError("email", "email is already in use");
+      }
+
+      if (usernameInUse) {
+        setFieldError("username", "username is already in use");
+      }
+
+      if (!emailInUse && !usernameInUse) {
+        const response = await signUp(
+          values.email,
+          values.password,
+          values.username
+        );
+        if (response.error) {
+          console.log(response.error);
+        } else if (response.session) {
+          setSession(response.session);
+          navigate("/dashboard");
+        }
       }
     },
   });
