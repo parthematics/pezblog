@@ -39,22 +39,19 @@ export function calculateStreak(entries: BlogEntry[]) {
 }
 
 export const copyToClipboard = (text: string): Promise<void> => {
-  // new Clipboard API
-  if (navigator.clipboard && window.isSecureContext) {
-    return navigator.clipboard.writeText(text);
-  }
-  // fallback for older browsers
-  else {
+  return new Promise((resolve, reject) => {
     const textArea = document.createElement("textarea");
     textArea.value = text;
-    // Avoid scrolling to bottom
-    textArea.style.position = "fixed";
     document.body.appendChild(textArea);
-    textArea.focus();
     textArea.select();
-    return new Promise((resolve, reject) => {
-      document.execCommand("copy") ? resolve() : reject();
+    try {
+      document.execCommand("copy")
+        ? resolve()
+        : reject(new Error("Copy command failed"));
+    } catch (err) {
+      reject(new Error("Copy command failed"));
+    } finally {
       textArea.remove();
-    });
-  }
+    }
+  });
 };
