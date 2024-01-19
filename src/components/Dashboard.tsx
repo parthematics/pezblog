@@ -8,6 +8,7 @@ import {
   makeEntryPublic,
   associateEntryWithSharedUid,
   calculateStreak,
+  copyToClipboard,
   BlogEntry,
   User,
 } from "../supabase";
@@ -113,7 +114,7 @@ export const Dashboard: React.FC = () => {
         );
       } else {
         const shareableLink = `${baseUrl}/dashboard/entry/${sharingUid}`;
-        navigator.clipboard.writeText(shareableLink).then(
+        copyToClipboard(shareableLink).then(
           () => {
             alert("link copied to clipboard!");
           },

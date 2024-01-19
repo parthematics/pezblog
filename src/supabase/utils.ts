@@ -37,3 +37,24 @@ export function calculateStreak(entries: BlogEntry[]) {
 
   return streak;
 }
+
+export const copyToClipboard = (text: string): Promise<void> => {
+  // new Clipboard API
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text);
+  }
+  // fallback for older browsers
+  else {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    // Avoid scrolling to bottom
+    textArea.style.position = "fixed";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    return new Promise((resolve, reject) => {
+      document.execCommand("copy") ? resolve() : reject();
+      textArea.remove();
+    });
+  }
+};
