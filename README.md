@@ -1,5 +1,4 @@
-## _pezblog_
-#### the blog you've always missed
+## _pezblog_ #### the blog you've always missed
 
 _pezblog_ was inspired by the feel of blogs/personal websites from the early 2000s. Nowadays, it's hard to get the same raw feeling from writing on a Substack or Wordpress site. Treat yourself to something better.
 
@@ -33,7 +32,7 @@ Thought one of your journal entries was worthy of sharing with the world? Press 
 ### Streaks
 See how consistent you've been recounting your thoughts with streaks! Rewards for achieving a certain level of streak have not yet been implemented, but are in the works soon!
 
-![image](https://github.com/parthematics/pezblog/assets/35244805/d35b2f25-05bd-4db6-8140-f3c9e441805b)
+![image](https://github.com/parthematics/pezblog/assets/35244805/12a4c8f1-ab3b-44a2-aab4-fe65fba9c838)
 
 ---
 
