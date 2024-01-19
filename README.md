@@ -1,4 +1,5 @@
-## _pezblog_ #### the blog you've always missed
+## _pezblog_ 
+#### the blog you've always missed
 
 _pezblog_ was inspired by the feel of blogs/personal websites from the early 2000s. Nowadays, it's hard to get the same raw feeling from writing on a Substack or Wordpress site. Treat yourself to something better.
 
@@ -8,8 +9,6 @@ _pezblog_ was inspired by the feel of blogs/personal websites from the early 200
 Getting started is as easy as signing up for an account [here]([url](https://pezblog.vercel.app/signup)https://pezblog.vercel.app/signup). Claim the short usernames while they're still available! You can login using a simple username/password (no unnecessary integrations needed). Logging in with email also works.
 
 ![image](https://github.com/parthematics/pezblog/assets/35244805/f62b16d4-1d57-4d7d-be40-809fb3fb7dfc)
-
----
 
 ### Writing an entry
 Not really much to it. Add a title (can be something as simple as "journal #1" if you're not feeling creative) and some content and add the entry. Entries will always be sorted on the dashboard in reverse chronological order (most recent first).
