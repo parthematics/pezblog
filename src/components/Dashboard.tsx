@@ -97,12 +97,22 @@ export const Dashboard: React.FC = () => {
   };
 
   const handleShareEntry = async (entryId: number) => {
+    const baseUrl = `${window.location.protocol}//${window.location.host}`;
+    const sharingUid = Math.random().toString(36).substring(2, 15);
+    const shareableLink = `${baseUrl}/dashboard/entry/${sharingUid}`;
+    // copy link to clipboard first bc Apple devices have specific requirements
+    copyToClipboard(shareableLink).then(
+      () => {
+        alert("link copied to clipboard!");
+      },
+      (err) => {
+        console.error("Could not copy link: ", err);
+      }
+    );
     const { error: publicError } = await makeEntryPublic(entryId);
     if (publicError) {
       console.error("Error marking entry as public: ", publicError);
     } else {
-      const baseUrl = `${window.location.protocol}//${window.location.host}`;
-      const sharingUid = Math.random().toString(36).substr(2, 13);
       const { error: sharingError } = await associateEntryWithSharedUid(
         sharingUid,
         entryId
@@ -111,16 +121,6 @@ export const Dashboard: React.FC = () => {
         console.error(
           "Error associating entry with sharing uid: ",
           sharingError
-        );
-      } else {
-        const shareableLink = `${baseUrl}/dashboard/entry/${sharingUid}`;
-        copyToClipboard(shareableLink).then(
-          () => {
-            alert("link copied to clipboard!");
-          },
-          (err) => {
-            console.error("Could not copy link: ", err);
-          }
         );
       }
     }
