@@ -179,8 +179,8 @@ export const Dashboard: React.FC = () => {
       <div className="w-full md:w-5/12">
         {entries.map((entry, index) => (
           <div key={index} className="my-4 pb-3 border-b">
-            <div className="flex justify-between items-center">
-              <h2 className="font-bold text-lg mb-2">{entry.title}</h2>
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="font-bold text-lg">{entry.title}</h2>
               <span className="text-sm text-gray-600">
                 {new Date(entry.created_at).toLocaleDateString() + " "}
                 {new Date(entry.created_at).toLocaleTimeString()}
