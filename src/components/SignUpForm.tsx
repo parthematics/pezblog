@@ -1,7 +1,7 @@
 import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { signUp } from "../supabase/service";
+import { signUp } from "../supabase";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 

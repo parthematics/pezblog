@@ -7,12 +7,15 @@ import {
   deleteEntry,
   makeEntryPublic,
   associateEntryWithSharedUid,
-} from "../supabase/service";
-import { BlogEntry, User } from "../supabase";
+  calculateStreak,
+  BlogEntry,
+  User,
+} from "../supabase";
 
 export const Dashboard: React.FC = () => {
   const { session } = useAuth();
   const [entries, setEntries] = useState<BlogEntry[]>([]);
+  const [streak, setStreak] = useState<number>(0);
   const [user, setUser] = useState<User | null>(null);
   const [newEntryTitle, setNewEntryTitle] = useState("");
   const [newEntryContent, setNewEntryContent] = useState("");
@@ -50,6 +53,11 @@ export const Dashboard: React.FC = () => {
     fetchEntries();
     fetchUser();
   }, [session]);
+
+  useEffect(() => {
+    const streak = calculateStreak(entries ?? []);
+    setStreak(streak);
+  }, [entries]);
 
   // Handle new entry submission
   const handleNewEntrySubmit = async (e: React.FormEvent) => {
@@ -137,10 +145,11 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center space-y-8 px-4">
-      <h1 className="text-2xl font-bold mt-6">
+      <h1 className="text-2xl font-bold mt-6 -mb-5">
         {user?.username ?? "my"}
         {user?.username ? "'s" : ""} entries
       </h1>
+      <h3>{streak} day streak</h3>
       <form
         onSubmit={handleNewEntrySubmit}
         className="flex flex-col items-center w-full md:w-1/2"

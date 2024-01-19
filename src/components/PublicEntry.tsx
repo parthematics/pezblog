@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getEntryUsingSharedUid, getUser } from "../supabase/service";
-import { BlogEntry } from "../supabase";
-import { supabase } from "../supabase";
+import { BlogEntry, supabase, getEntryUsingSharedUid } from "../supabase";
 
 export const PublicEntry: React.FC = () => {
   const { sharingUid } = useParams();
