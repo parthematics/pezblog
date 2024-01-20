@@ -6,7 +6,7 @@ _pezblog_ was inspired by the feel of blogs/personal websites from the early 200
 ### Getting started
 Getting started is as easy as signing up for an account [here]([url](https://pezblog.vercel.app/signup)https://pezblog.vercel.app/signup). Claim the short usernames while they're still available! You can login using a simple username/password (no unnecessary integrations needed). Logging in with email also works.
 
-![image](https://github.com/parthematics/pezblog/assets/35244805/f62b16d4-1d57-4d7d-be40-809fb3fb7dfc)
+![image](https://github.com/parthematics/pezblog/assets/35244805/f62b16d4-1d57-4d7d-be40-809fb3fb7dfc){ width="800" height="600" style="display: block; margin: 0 auto" }
 
 ### Writing an entry
 Not really much to it. Add a title (can be something as simple as "journal #1" if you're not feeling creative) and some content and add the entry. Entries will always be sorted on the dashboard in reverse chronological order (most recent first).
