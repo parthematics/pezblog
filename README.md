@@ -1,5 +1,4 @@
-## _pezblog_ 
-#### the blog you've always missed
+## _pezblog_: the blog you've always missed
 
 _pezblog_ was inspired by the feel of blogs/personal websites from the early 2000s. Nowadays, it's hard to get the same raw feeling from writing on a Substack or Wordpress site. Treat yourself to something better.
 
