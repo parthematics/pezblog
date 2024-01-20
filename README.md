@@ -14,7 +14,7 @@ Not really much to it. Add a title (can be something as simple as "journal #1" i
 ![image](https://github.com/parthematics/pezblog/assets/35244805/15ed56d3-bf9f-43c6-a1ec-2aec8e94c251)
 
 ### Sharing an entry
-Thought one of your journal entries was worthy of sharing with the world? Press the "share" button in the bottom right of each entry to copy a unique link to **that entry only** and make it publicly viewable. You completely choose which entries to keep private!
+Thought one of your journal entries was worthy of sharing with the world? Press the "share" button in the bottom right of each entry to copy a unique link to **that entry only** and make it publicly viewable. Users can only share **their own entries** (obviously), and they completely choose which entries to keep private!
 
   * #### Personal journal entry view: 
 ![image](https://github.com/parthematics/pezblog/assets/35244805/3797ade5-35e0-4256-bcb2-04a19879e1e1)
@@ -26,8 +26,6 @@ Thought one of your journal entries was worthy of sharing with the world? Press 
 See how consistent you've been recounting your thoughts with streaks! Rewards for achieving a certain level of streak have not yet been implemented, but are in the works soon!
 
 ![image](https://github.com/parthematics/pezblog/assets/35244805/12a4c8f1-ab3b-44a2-aab4-fe65fba9c838)
-
----
 
 ### Contributing
 If you'd like to contribute to this repo and improve the overall experience of _pezblog_, please feel free to clone the repo and submit a pull request!
