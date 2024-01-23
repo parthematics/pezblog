@@ -65,7 +65,7 @@ export const PublicEntry: React.FC = () => {
                   onClick={() => {
                     return false;
                   }}
-                  className="bg-gray-200 hover:bg-gray-400 text-gray-600 text-xs px-1.5 py-0.5 rounded mr-1"
+                  className="bg-blue-100 text-gray-900 text-xs px-1.5 py-0.5 rounded mr-1"
                 >
                   {tag}
                 </button>
