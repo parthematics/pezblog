@@ -6,6 +6,7 @@ export interface BlogEntry {
   last_updated_at: string | null;
   title: string | null;
   user_auth_id: string | null;
+  tags: string[] | null;
 }
 
 export interface User {

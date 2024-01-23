@@ -1,11 +1,11 @@
-import { BlogEntry } from "./types";
+import { type BlogEntry } from "./types";
 
 export function calculateStreak(entries: BlogEntry[]) {
   if (entries.length === 0) {
     return 0;
   }
   // Assuming entries are sorted in descending order of createdAt
-  let latestEntryDate = new Date(entries[0].created_at);
+  const latestEntryDate = new Date(entries[0].created_at);
   latestEntryDate.setHours(0, 0, 0, 0);
 
   let currentDate = new Date();
@@ -14,7 +14,7 @@ export function calculateStreak(entries: BlogEntry[]) {
   let streak = latestEntryDate.getTime() === currentDate.getTime() ? 1 : 0;
 
   for (let i = 0; i < entries.length; i++) {
-    let entryDate = new Date(entries[i].created_at);
+    const entryDate = new Date(entries[i].created_at);
     entryDate.setHours(0, 0, 0, 0); // Normalize entry date
 
     // Calculate the difference in days
@@ -37,10 +37,10 @@ export function calculateStreak(entries: BlogEntry[]) {
   return streak;
 }
 
-export const copyToClipboard = (text: string): Promise<void> => {
+export const copyToClipboard = async (text: string): Promise<void> => {
   // new clipboard API
   if (navigator.clipboard && window.isSecureContext) {
-    return navigator.clipboard.writeText(text);
+    await navigator.clipboard.writeText(text);
   }
   // fallback for older browsers
   else {
@@ -68,4 +68,10 @@ export const copyToClipboard = (text: string): Promise<void> => {
       }
     });
   }
+};
+
+export const stringToList = (str: string): string[] => {
+  str = str.trim();
+  const list = str.split(/\s+/);
+  return list.filter((item) => item !== "");
 };

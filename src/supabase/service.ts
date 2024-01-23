@@ -1,5 +1,5 @@
 import { supabase } from "./supabaseClient";
-import { User, Session, AuthError } from "@supabase/supabase-js";
+import { type User, type Session, type AuthError } from "@supabase/supabase-js";
 
 interface AuthResponse {
   user?: User | null;
@@ -20,7 +20,7 @@ export async function signUp(
   if (data?.user) {
     await supabase.from("users").insert({
       auth_id: data?.user.id,
-      username: username,
+      username,
       email: data?.user.email,
     });
   }
@@ -47,7 +47,7 @@ export async function login(
       .eq("username", username)
       .single();
 
-    if (error || !data || !data.email) {
+    if (error || !data?.email) {
       return { error: new Error(error?.details || "User not found.") };
     }
 
@@ -77,14 +77,16 @@ export async function login(
 export async function addNewEntry(
   userId: string | null | undefined,
   title?: string | null | undefined,
-  content?: string | null | undefined
+  content?: string | null | undefined,
+  tags?: string[] | null | undefined
 ) {
   const { data, error } = await supabase
     .from("entries")
     .insert({
       user_auth_id: userId,
-      title: title,
-      content: content,
+      title,
+      content,
+      tags,
     })
     .select();
   return { data, error };
@@ -164,7 +166,7 @@ export async function emailExists(email: string) {
     .eq("email", email)
     .single();
 
-  return error ? false : true;
+  return !error;
 }
 
 export async function usernameExists(username: string) {
@@ -174,5 +176,5 @@ export async function usernameExists(username: string) {
     .eq("username", username)
     .single();
 
-  return error ? false : true;
+  return !error;
 }

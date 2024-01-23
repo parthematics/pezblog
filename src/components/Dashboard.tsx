@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "./AuthContext";
 import {
   addNewEntry,
@@ -9,8 +9,9 @@ import {
   associateEntryWithSharedUid,
   calculateStreak,
   copyToClipboard,
-  BlogEntry,
-  User,
+  stringToList,
+  type BlogEntry,
+  type User,
 } from "../supabase";
 
 export const Dashboard: React.FC = () => {
@@ -20,6 +21,8 @@ export const Dashboard: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [newEntryTitle, setNewEntryTitle] = useState("");
   const [newEntryContent, setNewEntryContent] = useState("");
+  const [newEntryTags, setNewEntryTags] = useState("");
+  const [filteringByTag, setFilteringByTag] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -60,6 +63,13 @@ export const Dashboard: React.FC = () => {
     setStreak(streak);
   }, [entries]);
 
+  const filteredEntries = useMemo(() => {
+    if (!filteringByTag) {
+      return entries;
+    }
+    return entries.filter((entry) => entry.tags?.includes(filteringByTag));
+  }, [entries, filteringByTag]);
+
   // Handle new entry submission
   const handleNewEntrySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,7 +78,8 @@ export const Dashboard: React.FC = () => {
     const { data, error } = await addNewEntry(
       session.user.id,
       newEntryTitle,
-      newEntryContent
+      newEntryContent,
+      newEntryTags ? stringToList(newEntryTags) : []
     );
 
     if (error) {
@@ -78,6 +89,7 @@ export const Dashboard: React.FC = () => {
         setEntries([data[0], ...entries]);
         setNewEntryTitle("");
         setNewEntryContent("");
+        setNewEntryTags("");
       }
     }
   };
@@ -150,7 +162,11 @@ export const Dashboard: React.FC = () => {
         {user?.username ?? "my"}
         {user?.username ? "'s" : ""} entries
       </h1>
-      <h3>{streak} day streak</h3>
+      <h3>
+        {streak > 0 ? "🔥 " : ""}
+        {streak} day streak
+        {streak > 0 ? " 🔥" : ""}
+      </h3>
       <form
         onSubmit={handleNewEntrySubmit}
         className="flex flex-col items-center w-full md:w-1/2"
@@ -158,16 +174,29 @@ export const Dashboard: React.FC = () => {
         <input
           type="text"
           value={newEntryTitle}
-          onChange={(e) => setNewEntryTitle(e.target.value)}
+          onChange={(e) => {
+            setNewEntryTitle(e.target.value);
+          }}
           placeholder="title"
-          required
+          required={true}
           className="px-4 py-2 border rounded w-full md:w-2/3 mb-4"
         />
         <textarea
           value={newEntryContent}
-          onChange={(e) => setNewEntryContent(e.target.value)}
+          onChange={(e) => {
+            setNewEntryContent(e.target.value);
+          }}
           placeholder="content"
           required
+          className="px-4 py-2 border rounded w-full md:w-2/3 mb-4"
+        />
+        <input
+          type="text"
+          value={newEntryTags}
+          onChange={(e) => {
+            setNewEntryTags(e.target.value);
+          }}
+          placeholder="tags (optional, space separated)"
           className="px-4 py-2 border rounded w-full md:w-2/3 mb-8"
         />
         <button
@@ -177,8 +206,25 @@ export const Dashboard: React.FC = () => {
           add entry
         </button>
       </form>
+      {filteringByTag && (
+        <div className="w-full md:w-5/12 justify-between">
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-md">
+              entries tagged with: "<strong>{filteringByTag}</strong>"
+            </h2>
+            <button
+              onClick={() => {
+                setFilteringByTag("");
+              }}
+              className="bg-gray-600 hover:bg-gray-800 text-white text-sm px-2 py-1 rounded mr-1"
+            >
+              clear
+            </button>
+          </div>
+        </div>
+      )}
       <div className="w-full md:w-5/12">
-        {entries.map((entry, index) => (
+        {filteredEntries.map((entry, index) => (
           <div key={index} className="my-4 pb-3 border-b">
             <div className="flex justify-between items-center mb-2">
               <h2 className="font-bold text-lg">{entry.title}</h2>
@@ -187,18 +233,36 @@ export const Dashboard: React.FC = () => {
                 {new Date(entry.created_at).toLocaleTimeString()}
               </span>
             </div>
-            <p className="mb-1 flex-grow whitespace-pre-line">
+            <p className="mb-2 flex-grow whitespace-pre-line">
               {entry.content}
             </p>
             <div className="flex justify-end">
+              <div className="flex-grow">
+                {entry.tags &&
+                  entry.tags.map((tag, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setFilteringByTag(tag);
+                      }}
+                      className="bg-gray-200 hover:bg-gray-400 text-gray-600 text-xs px-1.5 py-0.5 rounded mr-1"
+                    >
+                      {tag}
+                    </button>
+                  ))}
+              </div>
               <button
-                onClick={() => handleShareEntry(entry.id)}
+                onClick={async () => {
+                  await handleShareEntry(entry.id);
+                }}
                 className="text-blue-600 hover:text-blue-800 text-sm pr-2"
               >
                 share
               </button>
               <button
-                onClick={() => handleDeleteEntry(entry.id)}
+                onClick={async () => {
+                  await handleDeleteEntry(entry.id);
+                }}
                 className="text-red-600 hover:text-red-800 text-sm"
               >
                 delete

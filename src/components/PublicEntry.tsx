@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { BlogEntry, supabase, getEntryUsingSharedUid } from "../supabase";
+import { supabase, getEntryUsingSharedUid, type BlogEntry } from "../supabase";
 
 export const PublicEntry: React.FC = () => {
   const { sharingUid } = useParams();
@@ -56,7 +56,22 @@ export const PublicEntry: React.FC = () => {
         {user ? (
           <h4 className="text-sm text-gray-600 mb-4">by {user.username}</h4>
         ) : null}
-        <p className="mb-1 flex-grow whitespace-pre-line">{entry.content}</p>
+        <p className="mb-2 flex-grow whitespace-pre-line">{entry.content}</p>
+        <div className="flex justify-start">
+          <div className="flex-grow">
+            {entry.tags &&
+              entry.tags.map((tag) => (
+                <button
+                  onClick={() => {
+                    return false;
+                  }}
+                  className="bg-gray-200 hover:bg-gray-400 text-gray-600 text-xs px-1.5 py-0.5 rounded mr-1"
+                >
+                  {tag}
+                </button>
+              ))}
+          </div>
+        </div>
       </div>
     </div>
   );

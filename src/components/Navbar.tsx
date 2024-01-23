@@ -25,7 +25,13 @@ const Navbar: React.FC = () => {
           </Link>
         ) : null}
         {session?.user?.id ? (
-          <Link to="/" className="mr-4" onClick={() => logout()}>
+          <Link
+            to="/"
+            className="mr-4"
+            onClick={() => {
+              logout();
+            }}
+          >
             logout
           </Link>
         ) : null}

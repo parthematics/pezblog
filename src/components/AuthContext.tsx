@@ -3,9 +3,9 @@ import React, {
   useContext,
   useState,
   useEffect,
-  ReactNode,
+  type ReactNode,
 } from "react";
-import { Session } from "@supabase/supabase-js";
+import { type Session } from "@supabase/supabase-js";
 import { supabase } from "../supabase";
 
 interface AuthContextType {
