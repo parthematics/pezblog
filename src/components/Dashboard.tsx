@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  type ChangeEvent,
+} from "react";
 import { useAuth } from "./AuthContext";
 import {
   addNewEntry,
@@ -24,6 +30,7 @@ export const Dashboard: React.FC = () => {
   const [newEntryTags, setNewEntryTags] = useState("");
   const [filteringByTag, setFilteringByTag] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     const fetchEntries = async () => {
@@ -138,6 +145,15 @@ export const Dashboard: React.FC = () => {
     }
   };
 
+  const handleTextAreaChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setNewEntryContent(e.target.value);
+    const textArea = textAreaRef.current;
+    if (textArea) {
+      textArea.style.height = "auto";
+      textArea.style.height = `${textArea.scrollHeight}px`;
+    }
+  };
+
   if (!session) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -182,10 +198,9 @@ export const Dashboard: React.FC = () => {
           className="px-4 py-2 border rounded w-full md:w-2/3 mb-4"
         />
         <textarea
+          ref={textAreaRef}
           value={newEntryContent}
-          onChange={(e) => {
-            setNewEntryContent(e.target.value);
-          }}
+          onChange={handleTextAreaChange}
           placeholder="content"
           required
           className="px-4 py-2 border rounded w-full md:w-2/3 mb-4"
@@ -207,20 +222,10 @@ export const Dashboard: React.FC = () => {
         </button>
       </form>
       {filteringByTag && (
-        <div className="w-full md:w-5/12 justify-between">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-md">
-              entries tagged with: "<strong>{filteringByTag}</strong>"
-            </h2>
-            <button
-              onClick={() => {
-                setFilteringByTag("");
-              }}
-              className="bg-gray-600 hover:bg-gray-800 text-white text-sm px-2 py-1 rounded mr-1"
-            >
-              clear
-            </button>
-          </div>
+        <div className="w-full md:w-5/12 flex justify-between">
+          <h2 className="text-md -mb-4">
+            entries tagged with: "<strong>{filteringByTag}</strong>"
+          </h2>
         </div>
       )}
       <div className="w-full md:w-5/12">
@@ -239,17 +244,29 @@ export const Dashboard: React.FC = () => {
             <div className="flex justify-end">
               <div className="flex-grow">
                 {entry.tags &&
-                  entry.tags.map((tag, index) => (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        setFilteringByTag(tag);
-                      }}
-                      className="bg-gray-200 hover:bg-gray-400 text-gray-600 text-xs px-1.5 py-0.5 rounded mr-1"
-                    >
-                      {tag}
-                    </button>
-                  ))}
+                  entry.tags.map((tag, index) =>
+                    tag !== filteringByTag ? (
+                      <button
+                        key={index}
+                        onClick={() => {
+                          setFilteringByTag(tag);
+                        }}
+                        className="bg-blue-100 hover:bg-blue-300 text-gray-900 text-xs px-1.5 py-0.5 rounded mr-1"
+                      >
+                        {tag}
+                      </button>
+                    ) : (
+                      <button
+                        key={index}
+                        onClick={() => {
+                          setFilteringByTag("");
+                        }}
+                        className="bg-blue-600 hover:bg-blue-800 text-white hover:text-white text-xs px-1.5 py-0.5 rounded mr-1"
+                      >
+                        {tag}
+                      </button>
+                    )
+                  )}
               </div>
               <button
                 onClick={async () => {
