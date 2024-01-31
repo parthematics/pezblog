@@ -1,34 +1,36 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { supabase, getEntryUsingSharedUid, type BlogEntry } from "../supabase";
+import {
+  getEntryUsingSharedUid,
+  getUsernameFromSharedAuthId,
+} from "../supabase";
+import { type BlogEntry } from "../types";
 
 export const PublicEntry: React.FC = () => {
   const { sharingUid } = useParams();
   const [entry, setEntry] = useState<BlogEntry | null>(null);
-  const [user, setUser] = useState<{ username: string | null } | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchEntry = async () => {
       if (sharingUid) {
-        const { data, error } = await getEntryUsingSharedUid(sharingUid);
-        if (error) {
-          console.error("Error fetching entry: ", error);
+        const sharedEntryData = await getEntryUsingSharedUid(sharingUid);
+        if (sharedEntryData instanceof Error) {
+          console.error("Error fetching entry: ", sharedEntryData);
           return <div>requested entry does not exist.</div>;
-        } else if (data?.is_private === true) {
+        } else if (sharedEntryData?.is_private === true) {
           return <div>you do not have access to this entry.</div>;
         } else {
-          const { data: user, error } = await supabase
-            .from("users")
-            .select("username")
-            .eq("auth_id", data?.user_auth_id ?? "")
-            .single();
+          const usernameData = await getUsernameFromSharedAuthId(
+            sharedEntryData?.user_auth_id
+          );
 
-          if (error) {
-            console.error("Error fetching user: ", error);
+          if (usernameData instanceof Error) {
+            console.error("Error fetching user: ", usernameData);
           } else {
-            setUser(user);
+            setUsername(usernameData);
           }
-          setEntry(data);
+          setEntry(sharedEntryData);
         }
       }
     };
@@ -53,18 +55,19 @@ export const PublicEntry: React.FC = () => {
             {new Date(entry.created_at).toLocaleTimeString()}
           </span>
         </div>
-        {user ? (
-          <h4 className="text-sm text-gray-600 mb-4">by {user.username}</h4>
+        {username ? (
+          <h4 className="text-sm text-gray-600 mb-4">by {username}</h4>
         ) : null}
         <p className="mb-2 flex-grow whitespace-pre-line">{entry.content}</p>
         <div className="flex justify-start">
           <div className="flex-grow">
             {entry.tags &&
-              entry.tags.map((tag) => (
+              entry.tags.map((tag, index) => (
                 <button
                   onClick={() => {
                     return false;
                   }}
+                  key={index}
                   className="bg-blue-100 text-gray-900 text-xs px-1.5 py-0.5 rounded mr-1"
                 >
                   {tag}

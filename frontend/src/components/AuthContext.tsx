@@ -6,7 +6,7 @@ import React, {
   type ReactNode,
 } from "react";
 import { type Session } from "@supabase/supabase-js";
-import { supabase } from "../supabase";
+import { logout } from "../supabase";
 
 interface AuthContextType {
   session: Session | null;
@@ -32,8 +32,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, [session]);
 
-  const logout = async () => {
-    const { error } = await supabase.auth.signOut();
+  const signOut = async () => {
+    const { error } = await logout();
     if (error) {
       console.error("Error logging out: ", error);
     }
@@ -41,7 +41,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   return (
-    <AuthContext.Provider value={{ session, setSession, logout }}>
+    <AuthContext.Provider value={{ session, setSession, logout: signOut }}>
       {children}
     </AuthContext.Provider>
   );

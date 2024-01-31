@@ -13,12 +13,10 @@ import {
   deleteEntry,
   makeEntryPublic,
   associateEntryWithSharedUid,
-  calculateStreak,
-  copyToClipboard,
-  stringToList,
-  type BlogEntry,
-  type User,
+  generatePrompt,
 } from "../supabase";
+import { type BlogEntry, type User } from "../types";
+import { calculateStreak, stringToList, copyToClipboard } from "../utils";
 
 export const Dashboard: React.FC = () => {
   const { session } = useAuth();
@@ -35,11 +33,11 @@ export const Dashboard: React.FC = () => {
   useEffect(() => {
     const fetchEntries = async () => {
       if (session) {
-        const { data, error } = await getAllEntries(session.user.id);
-        if (error) {
-          console.error("Error fetching entries: ", error);
+        const entryData = await getAllEntries(session.user.id);
+        if (entryData instanceof Error) {
+          console.error("Error fetching entries: ", entryData);
         } else {
-          const sortedEntries = data?.sort(
+          const sortedEntries = entryData?.sort(
             (a, b) =>
               new Date(b.created_at).getTime() -
               new Date(a.created_at).getTime()
@@ -52,11 +50,11 @@ export const Dashboard: React.FC = () => {
 
     const fetchUser = async () => {
       if (session) {
-        const { data: user, error } = await getUser(session.user.id);
-        if (error) {
-          console.error("Error fetching user: ", error);
+        const userData = await getUser(session.user.id);
+        if (userData instanceof Error) {
+          console.error("Error fetching user: ", userData);
         } else {
-          setUser(user);
+          setUser(userData);
         }
       }
     };
@@ -82,18 +80,18 @@ export const Dashboard: React.FC = () => {
     e.preventDefault();
     if (!session) return;
 
-    const { data, error } = await addNewEntry(
+    const newEntryData = await addNewEntry(
       session.user.id,
       newEntryTitle,
       newEntryContent,
       newEntryTags ? stringToList(newEntryTags) : []
     );
 
-    if (error) {
-      console.error("Error adding new entry:", error);
+    if (newEntryData instanceof Error) {
+      console.error("Error adding new entry: ", newEntryData);
     } else {
-      if (data && data[0]) {
-        setEntries([data[0], ...entries]);
+      if (newEntryData && newEntryData[0]) {
+        setEntries([newEntryData[0] as BlogEntry, ...entries]);
         setNewEntryTitle("");
         setNewEntryContent("");
         setNewEntryTags("");
@@ -106,9 +104,9 @@ export const Dashboard: React.FC = () => {
       "are you sure you want to delete this entry?"
     );
     if (confirmDelete) {
-      const { error } = await deleteEntry(entryId);
-      if (error) {
-        console.error("Error deleting entry:", error);
+      const deletedData = await deleteEntry(entryId);
+      if (deletedData instanceof Error) {
+        console.error("Error deleting entry:", deletedData);
       } else {
         setEntries(entries.filter((entry) => entry.id !== entryId));
       }
@@ -128,18 +126,18 @@ export const Dashboard: React.FC = () => {
         console.error("Could not copy link: ", err);
       }
     );
-    const { error: publicError } = await makeEntryPublic(entryId);
-    if (publicError) {
-      console.error("Error marking entry as public: ", publicError);
+    const publicEntryData = await makeEntryPublic(entryId);
+    if (publicEntryData instanceof Error) {
+      console.error("Error marking entry as public: ", publicEntryData);
     } else {
-      const { error: sharingError } = await associateEntryWithSharedUid(
+      const sharedEntryData = await associateEntryWithSharedUid(
         sharingUid,
         entryId
       );
-      if (sharingError) {
+      if (sharedEntryData instanceof Error) {
         console.error(
           "Error associating entry with sharing uid: ",
-          sharingError
+          sharedEntryData
         );
       }
     }
@@ -160,14 +158,6 @@ export const Dashboard: React.FC = () => {
         <div>
           <a href="/">please log in to view this page</a>
         </div>
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        loading...
       </div>
     );
   }
@@ -214,12 +204,37 @@ export const Dashboard: React.FC = () => {
           placeholder="tags (optional, space separated)"
           className="px-4 py-2 border rounded w-full md:w-2/3 mb-8"
         />
-        <button
-          type="submit"
-          className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-800"
-        >
-          add entry
-        </button>
+        <div className="justify-center">
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-800 mr-4"
+          >
+            add entry
+          </button>
+          <button
+            type="button"
+            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-800"
+            onClick={async () => {
+              setIsLoading(true);
+              const prompt = await generatePrompt();
+              console.log("prompt: ", prompt);
+              setNewEntryContent(
+                !(prompt instanceof Error) && prompt ? prompt : newEntryContent
+              );
+              const textArea = textAreaRef.current;
+              if (textArea) {
+                textArea.style.height = "200px";
+              }
+              setIsLoading(false);
+            }}
+          >
+            {isLoading ? (
+              <i className="fas fa-spinner fa-spin"></i>
+            ) : (
+              "✨ help me think ✨"
+            )}
+          </button>
+        </div>
       </form>
       {filteringByTag && (
         <div className="w-full md:w-5/12 flex justify-between">

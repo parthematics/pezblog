@@ -6,6 +6,7 @@ import { LoginForm } from "./components/LoginForm";
 import { Dashboard } from "./components/Dashboard";
 import { AuthProvider } from "./components/AuthContext";
 import { PublicEntry } from "./components/PublicEntry";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 
 function App() {
   return (
