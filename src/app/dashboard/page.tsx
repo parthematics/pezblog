@@ -22,10 +22,6 @@ import {
   type User,
 } from "../server";
 
-type AuthenticatedUser = {
-  id: string | null | undefined;
-};
-
 export default function DashboardPage() {
   const [entries, setEntries] = useState<BlogEntry[]>([]);
   const [streak, setStreak] = useState<number>(0);
@@ -37,15 +33,12 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isPromptLoading, setIsPromptLoading] = useState(false);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const authUser: AuthenticatedUser = {
-    id: null,
-  };
 
   useEffect(() => {
-    authUser.id = localStorage.getItem("user_auth_id");
+    const userAuthId = localStorage.getItem("user_auth_id");
     const fetchEntries = async () => {
-      if (authUser.id) {
-        const { data, error } = await getAllEntries(authUser.id);
+      if (userAuthId) {
+        const { data, error } = await getAllEntries(userAuthId);
         if (error) {
           console.error("Error fetching entries: ", error);
         } else {
@@ -68,8 +61,8 @@ export default function DashboardPage() {
       }
     };
     const fetchUser = async () => {
-      if (authUser.id) {
-        const { data: user, error } = await getUser(authUser.id);
+      if (userAuthId) {
+        const { data: user, error } = await getUser(userAuthId);
         if (error) {
           console.error("Error fetching user: ", error);
         } else {
@@ -109,10 +102,12 @@ export default function DashboardPage() {
   // Handle new entry submission
   const handleNewEntrySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!authUser.id) return;
-
+    if (!user?.auth_id) {
+      console.error("User auth id not found");
+      return;
+    }
     const { data, error } = await addNewEntry(
-      authUser.id,
+      user?.auth_id,
       newEntryTitle,
       newEntryContent,
       newEntryTags ? stringToList(newEntryTags) : []
@@ -194,7 +189,10 @@ export default function DashboardPage() {
         {streak} day streak
         {streak > 0 ? " 🔥" : ""}
       </h3>
-      <form className="flex flex-col items-center w-full md:w-1/2">
+      <form
+        onSubmit={handleNewEntrySubmit}
+        className="flex flex-col items-center w-full md:w-1/2"
+      >
         <input
           type="text"
           value={newEntryTitle}
@@ -224,8 +222,7 @@ export default function DashboardPage() {
         />
         <div className="justify-center">
           <button
-            type="button"
-            onClick={handleNewEntrySubmit}
+            type="submit"
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-800 mr-4"
           >
             add entry
