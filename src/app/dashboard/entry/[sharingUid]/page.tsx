@@ -86,8 +86,11 @@ const PublicEntry = async ({ params }: Props) => {
           <div className="flex justify-start">
             <div className="flex-grow">
               {entryData.tags &&
-                entryData.tags.map((tag) => (
-                  <button className="bg-blue-100 text-gray-900 text-xs px-1.5 py-0.5 rounded mr-1">
+                entryData.tags.map((tag, index) => (
+                  <button
+                    key={index}
+                    className="bg-blue-100 text-gray-900 text-xs px-1.5 py-0.5 rounded mr-1"
+                  >
                     {tag}
                   </button>
                 ))}
