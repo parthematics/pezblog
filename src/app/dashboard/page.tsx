@@ -22,7 +22,11 @@ import {
   type User,
 } from "../server";
 
-export const Dashboard: React.FC = () => {
+type AuthenticatedUser = {
+  id: string | null | undefined;
+};
+
+export default function DashboardPage() {
   const [entries, setEntries] = useState<BlogEntry[]>([]);
   const [streak, setStreak] = useState<number>(0);
   const [user, setUser] = useState<User | null>(null);
@@ -31,14 +35,17 @@ export const Dashboard: React.FC = () => {
   const [newEntryTags, setNewEntryTags] = useState("");
   const [filteringByTag, setFilteringByTag] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isPromptLoading, setIsPromptLoading] = useState(false);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-
-  const authUserId = localStorage.getItem("user_auth_id");
+  const authUser: AuthenticatedUser = {
+    id: null,
+  };
 
   useEffect(() => {
+    authUser.id = localStorage.getItem("user_auth_id");
     const fetchEntries = async () => {
-      if (authUserId) {
-        const { data, error } = await getAllEntries(authUserId);
+      if (authUser.id) {
+        const { data, error } = await getAllEntries(authUser.id);
         if (error) {
           console.error("Error fetching entries: ", error);
         } else {
@@ -50,12 +57,19 @@ export const Dashboard: React.FC = () => {
           setEntries(sortedEntries ?? []);
         }
         setIsLoading(false);
+      } else {
+        return (
+          <div className="flex justify-center items-center h-screen">
+            <div>
+              <a href="/">please log in to view this page</a>
+            </div>
+          </div>
+        );
       }
     };
-
     const fetchUser = async () => {
-      if (authUserId) {
-        const { data: user, error } = await getUser(authUserId);
+      if (authUser.id) {
+        const { data: user, error } = await getUser(authUser.id);
         if (error) {
           console.error("Error fetching user: ", error);
         } else {
@@ -63,10 +77,9 @@ export const Dashboard: React.FC = () => {
         }
       }
     };
-
     fetchEntries();
     fetchUser();
-  }, [authUserId]);
+  }, [authUser]);
 
   useEffect(() => {
     const streak = calculateStreak(entries ?? []);
@@ -80,13 +93,26 @@ export const Dashboard: React.FC = () => {
     return entries.filter((entry) => entry.tags?.includes(filteringByTag));
   }, [entries, filteringByTag]);
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div>
+          <i
+            className="fas fa-spinner fa-spin"
+            style={{ fontSize: "60px" }}
+          ></i>
+        </div>
+      </div>
+    );
+  }
+
   // Handle new entry submission
   const handleNewEntrySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!authUserId) return;
+    if (!authUser.id) return;
 
     const { data, error } = await addNewEntry(
-      authUserId,
+      authUser.id,
       newEntryTitle,
       newEntryContent,
       newEntryTags ? stringToList(newEntryTags) : []
@@ -157,16 +183,6 @@ export const Dashboard: React.FC = () => {
     }
   };
 
-  if (!authUserId) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div>
-          <a href="/">please log in to view this page</a>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col items-center justify-center space-y-8 px-4">
       <h1 className="text-2xl font-bold mt-6 -mb-5">
@@ -220,17 +236,17 @@ export const Dashboard: React.FC = () => {
             type="button"
             className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-800"
             onClick={async () => {
-              setIsLoading(true);
+              setIsPromptLoading(true);
               const prompt = await generatePrompt();
               setNewEntryContent(prompt ?? newEntryContent);
               const textArea = textAreaRef.current;
               if (textArea) {
                 textArea.style.height = "200px";
               }
-              setIsLoading(false);
+              setIsPromptLoading(false);
             }}
           >
-            {isLoading ? (
+            {isPromptLoading ? (
               <i className="fas fa-spinner fa-spin"></i>
             ) : (
               "✨ help me think ✨"
@@ -307,6 +323,4 @@ export const Dashboard: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default Dashboard;
+}

@@ -5,7 +5,6 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { signUp, emailExists, usernameExists } from "../server";
 import { useRouter } from "next/navigation";
-import Navbar from "../navbar";
 
 const SignupSchema = Yup.object().shape({
   email: Yup.string().email("invalid email").required("email is required"),
