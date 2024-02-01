@@ -20,7 +20,7 @@ export default function LoginPage() {
       password: "",
     },
     validationSchema: LoginSchema,
-    onSubmit: async (values) => {
+    onSubmit: async (values, { setFieldError }) => {
       const response = await login(
         values.emailOrUsername.includes("@")
           ? values.emailOrUsername
@@ -34,6 +34,10 @@ export default function LoginPage() {
         localStorage.setItem("user_auth_id", response.session.user.id);
         router.push("/dashboard");
       } else {
+        setFieldError(
+          "emailOrUsername",
+          response.error?.message ?? "invalid login credentials"
+        );
         console.error(response.error);
       }
     },
