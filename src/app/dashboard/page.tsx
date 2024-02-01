@@ -79,7 +79,7 @@ export default function DashboardPage() {
     };
     fetchEntries();
     fetchUser();
-  }, [authUser]);
+  }, []);
 
   useEffect(() => {
     const streak = calculateStreak(entries ?? []);
