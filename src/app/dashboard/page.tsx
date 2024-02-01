@@ -77,8 +77,8 @@ export default function DashboardPage() {
         }
       }
     };
-    fetchEntries();
     fetchUser();
+    fetchEntries();
   }, []);
 
   useEffect(() => {
