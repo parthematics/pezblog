@@ -5,12 +5,6 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "pezblog: the blog you've always missed",
-  description:
-    "get started using pezblog today and keep track of what matters.",
-};
-
 export default function RootLayout({
   children,
 }: {
