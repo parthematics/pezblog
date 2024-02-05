@@ -1,17 +1,19 @@
 "use client";
 
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { User } from "@supabase/auth-helpers-nextjs";
 import Link from "next/link";
-import { signOut } from "./server";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 
-export default function Navbar() {
-  const [authUserId, setAuthUserId] = useState<string | null>(null);
+export default function Navbar({ user }: { user: User | null }) {
+  const supabase = createClientComponentClient();
   const router = useRouter();
 
-  useEffect(() => {
-    setAuthUserId(localStorage.getItem("user_auth_id"));
-  }, []);
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.refresh();
+  };
 
   return (
     <nav className="flex justify-between items-center p-4 bg-gray-800 text-white">
@@ -19,7 +21,7 @@ export default function Navbar() {
         pezblog
       </Link>
       <div>
-        {!authUserId ? (
+        {!user ? (
           <>
             <Link href="/" className="mr-4" passHref prefetch>
               login
@@ -34,18 +36,7 @@ export default function Navbar() {
               dashboard
             </Link>
             <Link legacyBehavior href="/" className="mr-4">
-              <a
-                onClick={(e) => {
-                  router.push("/");
-                  e.preventDefault();
-                  localStorage.removeItem("user_auth_id");
-                  signOut();
-                  setAuthUserId(null);
-                }}
-              >
-                logout
-              </a>
-              {/* logout */}
+              <a onClick={handleLogout}>logout</a>
             </Link>
           </>
         )}

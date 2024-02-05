@@ -1,97 +1,12 @@
 "use server";
 
-import { type User, type Session, type AuthError } from "@supabase/supabase-js";
-import { createClient } from "@supabase/supabase-js";
 import { type Database } from "./database.types";
-import { setCookie, destroyCookie } from "nookies";
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
 
-const supabaseUrl = process.env.SUPABASE_PROJECT_URL ?? "";
-const supabaseAnonKey = process.env.SUPABASE_API_KEY ?? "";
-const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
-
-interface AuthResponse {
-  user?: User | null;
-  session?: Session | null;
-  error?: AuthError | Error | null;
-}
-
-export async function signUp(
-  email: string,
-  password: string,
-  username: string
-): Promise<AuthResponse> {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-  });
-
-  if (data?.user) {
-    await supabase.from("users").insert({
-      auth_id: data?.user.id,
-      username,
-      email: data?.user.email,
-    });
-  }
-
-  return { user: data?.user, session: data?.session, error };
-}
-
-export async function login(
-  email: string | undefined,
-  username: string | undefined,
-  password: string
-): Promise<AuthResponse> {
-  if (!email && !username) {
-    return { error: new Error("Username or email required.") };
-  }
-  if (!password) {
-    return { error: new Error("Password required.") };
-  }
-
-  if (username) {
-    const { data, error } = await supabase
-      .from("users")
-      .select("email")
-      .eq("username", username)
-      .single();
-
-    if (error || !data?.email) {
-      return { error: new Error(error?.details || "User not found.") };
-    }
-
-    const signInResponse = await supabase.auth.signInWithPassword({
-      email: data.email,
-      password,
-    });
-
-    setCookie(null, "session", JSON.stringify(signInResponse.data.session), {
-      maxAge: 30 * 24 * 60 * 60,
-      path: "/",
-      httpOnly: true,
-    });
-
-    return {
-      user: signInResponse.data.user,
-      session: signInResponse.data.session,
-      error,
-    };
-  }
-
-  if (email) {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { user: data.user, session: data.session, error };
-  }
-  // Fallback case
-  return { error: new Error("Login was unsuccessful. Please check logs.") };
-}
-
-export async function signOut() {
-  destroyCookie(null, "session");
-  return await supabase.auth.signOut();
-}
+const supabase = createServerComponentClient<Database>({
+  cookies,
+});
 
 export async function addNewEntry(
   userId: string | null | undefined,
