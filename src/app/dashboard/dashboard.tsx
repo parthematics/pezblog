@@ -34,20 +34,10 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
   const [isPromptLoading, setIsPromptLoading] = useState(false);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
-  if (!user) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div>
-          <a href="/">please log in to view this page</a>
-        </div>
-      </div>
-    );
-  }
-
   useEffect(() => {
-    const userAuthId = user?.id;
     const fetchEntries = async () => {
-      if (userAuthId) {
+      if (user) {
+        const userAuthId = user?.id;
         const { data: usernameData } = await getUsernameFromAuthId(userAuthId);
         setUsername(usernameData?.username ?? "");
 
@@ -66,7 +56,7 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
       }
     };
     fetchEntries();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     const streak = calculateStreak(entries ?? []);
@@ -81,16 +71,28 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
   }, [entries, filteringByTag]);
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div>
-          <i
-            className="fas fa-spinner fa-spin"
-            style={{ fontSize: "60px" }}
-          ></i>
+    if (user) {
+      return (
+        <div className="flex justify-center items-center h-screen">
+          <div>
+            <i
+              className="fas fa-spinner fa-spin"
+              style={{ fontSize: "60px" }}
+            ></i>
+          </div>
         </div>
-      </div>
-    );
+      );
+    } else {
+      if (!user) {
+        return (
+          <div className="flex justify-center items-center h-screen">
+            <div>
+              <a href="/">please log in to view this page</a>
+            </div>
+          </div>
+        );
+      }
+    }
   }
 
   // Handle new entry submission

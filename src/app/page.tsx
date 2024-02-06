@@ -9,11 +9,12 @@ export default async function LoginPage() {
 
   const {
     data: { user },
+    error,
   } = await supabase.auth.getUser();
 
   return (
     <>
-      <Navbar user={user} />
+      <Navbar user={error ? null : user} />
       <LoginForm />
     </>
   );

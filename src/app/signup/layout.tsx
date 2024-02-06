@@ -11,11 +11,12 @@ export default async function SignupLayout({
   const supabase = createServerComponentClient<Database>({ cookies });
   const {
     data: { user },
+    error,
   } = await supabase.auth.getUser();
 
   return (
     <section>
-      <Navbar user={user} />
+      <Navbar user={error ? null : user} />
       {children}
     </section>
   );
