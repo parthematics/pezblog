@@ -6,6 +6,12 @@ export const dynamic = "force-dynamic";
 
 const inter = Inter({ subsets: ["latin"] });
 
+export const metadata: Metadata = {
+  title: "pezblog: the blog you've always missed",
+  description:
+    "get started using pezblog today and keep track of what matters.",
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -18,14 +24,6 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://pezblog.vercel.app/" />
-        <meta
-          property="og:title"
-          content="pezblog: the blog you've always missed"
-        />
-        <meta
-          property="og:description"
-          content="get started using pezblog today and keep track of what matters."
-        />
         <meta
           property="og:image"
           content={`https://pezblog.vercel.app/logo512.png`}

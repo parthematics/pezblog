@@ -19,16 +19,13 @@ export async function generateMetadata(
     );
     if (user?.username) {
       return {
-        title: `pezblog: ${entryData.title}, by ${user.username}`,
-        description: entryData.content,
         openGraph: {
-          title: `pezblog: ${entryData.title}, by ${user.username}`,
+          title: `pezblog: "${entryData.title}" by ${user.username}`,
           description: entryData.content ?? "",
           type: "article",
           publishedTime: entryData.created_at,
           authors: [user.username],
           tags: entryData.tags,
-          images: "https://pezblog.vercel.app/logo192.png",
         },
       };
     }
