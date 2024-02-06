@@ -1,7 +1,7 @@
 "use server";
 
 import React from "react";
-import { getEntryUsingSharedUid, getUsernameFromAuthId } from "../../../server";
+import { getEntryUsingSharedUid, getUsernameFromAuthId } from "@/app/server";
 import { Metadata, ResolvingMetadata } from "next";
 
 type Props = {

@@ -1,11 +1,9 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
-import { Database } from "./server/database.types";
-import LoginForm from "./login";
-import Navbar from "./navbar";
+import { getServerComponentClient } from "@/app/server";
+import LoginForm from "@/app/login";
+import Navbar from "@/app/navbar";
 
 export default async function LoginPage() {
-  const supabase = createServerComponentClient<Database>({ cookies });
+  const supabase = await getServerComponentClient();
 
   const {
     data: { user },

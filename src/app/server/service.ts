@@ -1,11 +1,12 @@
 "use server";
 
-import { type Database } from "./database.types";
+import { type Database } from "@/app/server";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
+import { cache } from "react";
 
-const supabase = createServerComponentClient<Database>({
-  cookies,
+export const getServerComponentClient = cache(async () => {
+  return createServerComponentClient<Database>({ cookies });
 });
 
 export async function addNewEntry(
@@ -14,6 +15,7 @@ export async function addNewEntry(
   content?: string | null | undefined,
   tags?: string[] | null | undefined
 ) {
+  const supabase = await getServerComponentClient();
   const { data, error } = await supabase
     .from("entries")
     .insert({
@@ -26,7 +28,22 @@ export async function addNewEntry(
   return { data, error };
 }
 
+export async function editEntry(
+  entryId: number,
+  title?: string | null | undefined,
+  content?: string | null | undefined,
+  tags?: string[] | null | undefined
+) {
+  const supabase = await getServerComponentClient();
+  const { data, error } = await supabase
+    .from("entries")
+    .update({ title: title, content: content, tags: tags })
+    .eq("id", entryId);
+  return { data, error };
+}
+
 export async function getAllEntries(userId: string) {
+  const supabase = await getServerComponentClient();
   const { data, error } = await supabase
     .from("entries")
     .select()
@@ -35,6 +52,7 @@ export async function getAllEntries(userId: string) {
 }
 
 export async function getEntry(entryId: number) {
+  const supabase = await getServerComponentClient();
   const { data, error } = await supabase
     .from("entries")
     .select()
@@ -44,6 +62,7 @@ export async function getEntry(entryId: number) {
 }
 
 export async function deleteEntry(entryId: number) {
+  const supabase = await getServerComponentClient();
   const { data, error } = await supabase
     .from("entries")
     .delete()
@@ -52,6 +71,7 @@ export async function deleteEntry(entryId: number) {
 }
 
 export async function getUser(userId: string) {
+  const supabase = await getServerComponentClient();
   const { data, error } = await supabase
     .from("users")
     .select()
@@ -61,6 +81,7 @@ export async function getUser(userId: string) {
 }
 
 export async function makeEntryPublic(entryId: number) {
+  const supabase = await getServerComponentClient();
   const { data, error } = await supabase
     .from("entries")
     .update({ is_private: false })
@@ -72,6 +93,7 @@ export async function associateEntryWithSharedUid(
   sharingUid: string,
   entryId: number
 ) {
+  const supabase = await getServerComponentClient();
   const { data, error } = await supabase
     .from("shared_entries")
     .insert({ uid: sharingUid, entry_id: entryId })
@@ -80,6 +102,7 @@ export async function associateEntryWithSharedUid(
 }
 
 export async function getEntryUsingSharedUid(sharingUid: string) {
+  const supabase = await getServerComponentClient();
   const { data, error } = await supabase
     .from("shared_entries")
     .select("entry_id")
@@ -94,30 +117,11 @@ export async function getEntryUsingSharedUid(sharingUid: string) {
 }
 
 export async function getUsernameFromAuthId(user_auth_id: string) {
+  const supabase = await getServerComponentClient();
   const { data, error } = await supabase
     .from("users")
     .select("username")
     .eq("auth_id", user_auth_id)
     .single();
   return { data, error };
-}
-
-export async function emailExists(email: string) {
-  const { error } = await supabase
-    .from("users")
-    .select("email")
-    .eq("email", email)
-    .single();
-
-  return !error;
-}
-
-export async function usernameExists(username: string) {
-  const { error } = await supabase
-    .from("users")
-    .select("username")
-    .eq("username", username)
-    .single();
-
-  return !error;
 }

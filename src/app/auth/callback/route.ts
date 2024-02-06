@@ -1,6 +1,6 @@
 "use server";
 
-import { Database } from "../../server/database.types";
+import { Database } from "@/app/server";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";

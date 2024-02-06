@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import {
   addNewEntry,
+  editEntry,
   getAllEntries,
   deleteEntry,
   makeEntryPublic,
@@ -19,7 +20,7 @@ import {
   stringToList,
   generatePrompt,
   type BlogEntry,
-} from "../server";
+} from "@/app/server";
 import { User as SupabaseUser } from "@supabase/auth-helpers-nextjs";
 
 export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
@@ -32,6 +33,10 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
   const [isLoading, setIsLoading] = useState(true);
   const [username, setUsername] = useState<string | null>(null);
   const [isPromptLoading, setIsPromptLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedEntryTuple, setEditedEntryTuple] = useState<
+    [number | null, number | null]
+  >([null, null]);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -95,6 +100,18 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
     }
   }
 
+  const clearForm = () => {
+    setNewEntryTitle("");
+    setNewEntryContent("");
+    setNewEntryTags("");
+    setEditedEntryTuple([null, null]);
+    setIsEditing(false);
+    const textArea = textAreaRef.current;
+    if (textArea) {
+      textArea.style.height = "auto";
+    }
+  };
+
   // Handle new entry submission
   const handleNewEntrySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,10 +131,36 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
     } else {
       if (data && data[0]) {
         setEntries([data[0], ...entries]);
-        setNewEntryTitle("");
-        setNewEntryContent("");
-        setNewEntryTags("");
+        clearForm();
       }
+    }
+  };
+
+  const handleEditedEntrySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user?.id) {
+      console.error("User auth id not found");
+      return;
+    }
+    // In the case where we're editing an existing entry
+    const editedEntryId = editedEntryTuple[0] ?? -1;
+    const editedEntryIdx = editedEntryTuple[1] ?? -1;
+    const { error } = await editEntry(
+      editedEntryId ?? -1,
+      newEntryTitle,
+      newEntryContent,
+      newEntryTags ? stringToList(newEntryTags) : []
+    );
+    if (error) {
+      console.error("Error editing entry:", error);
+    } else {
+      clearForm();
+      entries[editedEntryIdx].title = newEntryTitle;
+      entries[editedEntryIdx].content = newEntryContent;
+      entries[editedEntryIdx].tags = newEntryTags
+        ? stringToList(newEntryTags)
+        : [];
+      setEntries(entries);
     }
   };
 
@@ -133,6 +176,40 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
         setEntries(entries.filter((entry) => entry.id !== entryId));
       }
     }
+  };
+
+  const handleEditEntry = async (entryId: number) => {
+    const entryToEditIdx = entries.findIndex((entry) => entry.id === entryId);
+    const entryToEdit = entries[entryToEditIdx];
+    setNewEntryTitle(entryToEdit?.title ?? "");
+    setNewEntryContent(entryToEdit?.content ?? "");
+    setNewEntryTags(entryToEdit?.tags?.join(" ") ?? "");
+    setEditedEntryTuple([entryId, entryToEditIdx]);
+    setIsEditing(true);
+    // Ensure state updates have been flushed to DOM
+    requestAnimationFrame(() => {
+      const textArea = textAreaRef.current;
+      if (textArea) {
+        textArea.style.height = "auto";
+        textArea.style.height = `${textArea.scrollHeight}px`;
+      }
+      window.scrollTo(0, 0);
+    });
+  };
+
+  const handlePromptGeneration = async () => {
+    setIsPromptLoading(true);
+    const prompt = await generatePrompt();
+    setNewEntryContent(prompt ?? newEntryContent);
+    setIsPromptLoading(false);
+    // Ensure state updates have been flushed to DOM
+    requestAnimationFrame(() => {
+      const textArea = textAreaRef.current;
+      if (textArea) {
+        textArea.style.height = "auto";
+        textArea.style.height = `${textArea.scrollHeight}px`;
+      }
+    });
   };
 
   const handleShareEntry = async (entryId: number) => {
@@ -186,7 +263,7 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
         {streak > 0 ? " 🔥" : ""}
       </h3>
       <form
-        onSubmit={handleNewEntrySubmit}
+        onSubmit={isEditing ? handleEditedEntrySubmit : handleNewEntrySubmit}
         className="flex flex-col items-center w-full md:w-1/2"
       >
         <input
@@ -221,28 +298,29 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
             type="submit"
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-800 mr-4"
           >
-            add entry
+            {isEditing ? "save entry" : "add entry"}
           </button>
-          <button
-            type="button"
-            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-800"
-            onClick={async () => {
-              setIsPromptLoading(true);
-              const prompt = await generatePrompt();
-              setNewEntryContent(prompt ?? newEntryContent);
-              const textArea = textAreaRef.current;
-              if (textArea) {
-                textArea.style.height = "200px";
-              }
-              setIsPromptLoading(false);
-            }}
-          >
-            {isPromptLoading ? (
-              <i className="fas fa-spinner fa-spin"></i>
-            ) : (
-              "✨ help me think ✨"
-            )}
-          </button>
+          {!isEditing ? (
+            <button
+              type="button"
+              className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-800"
+              onClick={handlePromptGeneration}
+            >
+              {isPromptLoading ? (
+                <i className="fas fa-spinner fa-spin"></i>
+              ) : (
+                "✨ help me think ✨"
+              )}
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-800"
+              onClick={clearForm}
+            >
+              undo
+            </button>
+          )}
         </div>
       </form>
       {filteringByTag && (
@@ -292,6 +370,14 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
                     )
                   )}
               </div>
+              <button
+                onClick={async () => {
+                  await handleEditEntry(entry.id);
+                }}
+                className="text-blue-400 hover:text-blue-600 text-sm pr-2"
+              >
+                edit
+              </button>
               <button
                 onClick={async () => {
                   await handleShareEntry(entry.id);
