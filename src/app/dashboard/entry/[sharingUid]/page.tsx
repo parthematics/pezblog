@@ -3,6 +3,7 @@
 import React from "react";
 import { getEntryUsingSharedUid, getUsernameFromAuthId } from "@/app/server";
 import { Metadata, ResolvingMetadata } from "next";
+import Image from "next/image";
 
 type Props = {
   params: { sharingUid: string };
@@ -90,9 +91,13 @@ const PublicEntry = async ({ params }: Props) => {
             {entryData.content}
           </p>
           {entryData.image_url && (
-            <img
+            <Image
               src={entryData.image_url}
+              alt={entryData.title ?? "image failed to load"}
+              width={500}
+              height={500}
               className="w-full h-auto mb-4 mt-4"
+              priority
             />
           )}
           <div className="flex justify-start">

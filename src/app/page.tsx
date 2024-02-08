@@ -1,6 +1,8 @@
 import { getServerComponentClient } from "@/app/server";
-import LoginForm from "@/app/login";
-import Navbar from "@/app/navbar";
+import dynamic from "next/dynamic";
+
+const LoginForm = dynamic(() => import("@/app/login"));
+const Navbar = dynamic(() => import("@/app/navbar"));
 
 export default async function LoginPage() {
   const supabase = await getServerComponentClient();

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Manrope } from "next/font/google";
 import "./globals.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 export const dynamic = "force-dynamic";
 
-const inter = Inter({ subsets: ["latin"] });
+const globalFont = Manrope({ subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
   openGraph: {
@@ -15,6 +15,14 @@ export const metadata: Metadata = {
     type: "website",
     images: "https://pezblog.vercel.app/logo192.png",
   },
+  twitter: {
+    card: "summary_large_image",
+    site: "https://pezblog.vercel.app/",
+    title: "pezblog: the blog you've always missed",
+    description:
+      "get started using pezblog today and keep track of what matters.",
+    images: "https://pezblog.vercel.app/logo192.png",
+  },
 };
 
 export default function RootLayout({
@@ -23,28 +31,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={globalFont.className}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:url" content="https://pezblog.vercel.app/" />
-        <meta
-          property="twitter:title"
-          content="pezblog: the blog you've always missed"
-        />
-        <meta
-          property="twitter:description"
-          content="get started using pezblog today and keep track of what matters."
-        />
         <link
           rel="apple-touch-icon"
           href="https://pezblog.vercel.app/logo192.png"
         />
-        <link
+        {/* <link
           rel="stylesheet"
-          href={`https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap`}
-        />
+          href={`https://fonts.googleapis.com/css2?family=Cormorant:wght@400;600;700&display=swap`}
+        /> */}
         <link rel="icon" href="/favicon.ico" />
         <title>pezblog: the blog you've always missed</title>
       </head>

@@ -61,15 +61,17 @@ export async function POST(request: Request) {
       });
     }
 
-    const signInResponse = await supabase.auth.signInWithPassword({
-      email: data.email,
-      password,
-    });
+    const { data: signInResponse, error: usernameLoginError } =
+      await supabase.auth.signInWithPassword({
+        email: data.email,
+        password,
+      });
 
     return NextResponse.json({
-      user: signInResponse.data.user,
-      session: signInResponse.data.session,
-      error,
+      user: signInResponse.user,
+      session: signInResponse.session,
+      error: usernameLoginError,
+      ...(usernameLoginError ? { onField: "password" } : {}),
     });
   }
 }

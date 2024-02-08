@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { User } from "@supabase/auth-helpers-nextjs";
 import Link from "next/link";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
@@ -17,26 +17,40 @@ export default function Navbar({ user }: { user: User | null }) {
 
   return (
     <nav className="flex justify-between items-center p-4 bg-gray-800 text-white">
-      <Link href="/" passHref>
+      <Link href="/" passHref className="font-light hover:font-normal">
         pezblog
       </Link>
       <div>
         {!user ? (
           <>
-            <Link href="/" className="mr-4" passHref prefetch>
+            <Link href="/" className="mr-4 hover:font-normal" passHref prefetch>
               login
             </Link>
-            <Link href="/signup" className="mr-4" passHref prefetch>
+            <Link
+              href="/signup"
+              className="mr-4 font-light hover:font-normal"
+              passHref
+              prefetch
+            >
               signup
             </Link>
           </>
         ) : (
           <>
-            <Link href="/dashboard" className="mr-4" passHref>
+            <Link
+              href="/dashboard"
+              className="mr-4 font-light hover:font-normal"
+              passHref
+            >
               dashboard
             </Link>
             <Link legacyBehavior href="/" className="mr-4">
-              <a onClick={handleLogout}>logout</a>
+              <a
+                onClick={handleLogout}
+                className="font-light hover:font-normal"
+              >
+                logout
+              </a>
             </Link>
           </>
         )}

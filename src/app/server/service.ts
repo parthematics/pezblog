@@ -72,6 +72,16 @@ export async function deleteEntry(entryId: number) {
   return { data, error };
 }
 
+export async function deleteImage(imageUrl: string) {
+  const supabase = await getServerComponentClient();
+  const filename = imageUrl.split("public/images/")[1];
+  const { data, error } = await supabase.storage
+    .from("images")
+    .remove([filename]);
+  console.log("Deleted image: ", error);
+  return { data, error };
+}
+
 export async function getUser(userId: string) {
   const supabase = await getServerComponentClient();
   const { data, error } = await supabase
@@ -101,6 +111,21 @@ export async function associateEntryWithSharedUid(
     .insert({ uid: sharingUid, entry_id: entryId })
     .select();
   return { data, error };
+}
+
+export async function getSharedEntryUidIfPresent(entryId: number) {
+  const supabase = await getServerComponentClient();
+  const { data, error } = await supabase
+    .from("shared_entries")
+    .select("uid")
+    .eq("entry_id", entryId)
+    .limit(1)
+    .single();
+  if (error) {
+    console.error("Error getting shared entry: ", error);
+    return null;
+  }
+  return data.uid;
 }
 
 export async function getEntryUsingSharedUid(sharingUid: string) {

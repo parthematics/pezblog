@@ -27,10 +27,11 @@ export default function LoginForm() {
         body: JSON.stringify(values),
       });
       const responseData = await response.json();
+      console.log(responseData);
       if (responseData.error) {
         setFieldError(
           responseData.onField ?? "emailOrUsername",
-          responseData.error ?? "invalid login credentials"
+          responseData.error.message ?? "invalid login credentials"
         );
       } else {
         router.push("/dashboard");

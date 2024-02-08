@@ -1,5 +1,7 @@
-import Navbar from "@/app/navbar";
 import { getServerComponentClient } from "@/app/server";
+import dynamic from "next/dynamic";
+
+const Navbar = dynamic(() => import("@/app/navbar"));
 
 export default async function DashboardLayout({
   children,

@@ -12,8 +12,10 @@ import {
   editEntry,
   getAllEntries,
   deleteEntry,
+  deleteImage,
   makeEntryPublic,
   associateEntryWithSharedUid,
+  getSharedEntryUidIfPresent,
   getUsernameFromAuthId,
   calculateStreak,
   copyToClipboard,
@@ -22,6 +24,7 @@ import {
   type BlogEntry,
 } from "@/app/server";
 import { User as SupabaseUser } from "@supabase/auth-helpers-nextjs";
+import Image from "next/image";
 
 export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
   const [entries, setEntries] = useState<BlogEntry[]>([]);
@@ -155,14 +158,22 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
     }
   };
 
-  const handleDeleteEntry = async (entryId: number) => {
+  const handleDeleteEntry = async (
+    entryId: number,
+    entryImageUrl?: string | null | undefined
+  ) => {
     const confirmDelete = window.confirm(
       "are you sure you want to delete this entry?"
     );
     if (confirmDelete) {
-      const { error } = await deleteEntry(entryId);
-      if (error) {
-        console.error("Error deleting entry:", error);
+      const { error: dbDeleteError } = await deleteEntry(entryId);
+      const { error: imageDeleteError } = entryImageUrl
+        ? await deleteImage(entryImageUrl)
+        : { error: null };
+      if (dbDeleteError) {
+        console.error("Error deleting entry: ", dbDeleteError);
+      } else if (imageDeleteError) {
+        console.error("Error deleting image: ", imageDeleteError);
       } else {
         setEntries(entries.filter((entry) => entry.id !== entryId));
       }
@@ -205,7 +216,10 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
 
   const handleShareEntry = async (entryId: number) => {
     const baseUrl = `${window.location.protocol}//${window.location.host}`;
-    const sharingUid = Math.random().toString(36).substring(2, 15);
+    const existingSharingUid = await getSharedEntryUidIfPresent(entryId);
+    const sharingUid = !existingSharingUid
+      ? Math.random().toString(36).substring(2, 15)
+      : existingSharingUid;
     const shareableLink = `${baseUrl}/dashboard/entry/${sharingUid}`;
     // copy link to clipboard first bc Apple devices have specific requirements
     copyToClipboard(shareableLink).then(
@@ -216,19 +230,22 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
         console.error("Could not copy link: ", err);
       }
     );
-    const { error: publicError } = await makeEntryPublic(entryId);
-    if (publicError) {
-      console.error("Error marking entry as public: ", publicError);
-    } else {
-      const { error: sharingError } = await associateEntryWithSharedUid(
-        sharingUid,
-        entryId
-      );
-      if (sharingError) {
-        console.error(
-          "Error associating entry with sharing uid: ",
-          sharingError
+    // If the entry hasn't been shared before, mark it as public and associate it with the sharing uid
+    if (!existingSharingUid) {
+      const { error: publicError } = await makeEntryPublic(entryId);
+      if (publicError) {
+        console.error("Error marking entry as public: ", publicError);
+      } else {
+        const { error: sharingError } = await associateEntryWithSharedUid(
+          sharingUid,
+          entryId
         );
+        if (sharingError) {
+          console.error(
+            "Error associating entry with sharing uid: ",
+            sharingError
+          );
+        }
       }
     }
   };
@@ -251,7 +268,7 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
 
     try {
       setImageUploadLoading(true);
-      const response = await fetch("/upload", {
+      const response = await fetch("images/upload", {
         method: "POST",
         body: formData,
       });
@@ -284,8 +301,7 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
   return (
     <div className="flex flex-col items-center justify-center space-y-8 px-4">
       <h1 className="text-2xl font-bold mt-6 -mb-5">
-        {username ?? "my"}
-        {username ? "'s" : ""} entries
+        {username ? `entries by ${username}` : "my entries"}
       </h1>
       <h3>
         {streak > 0 ? "🔥 " : ""}
@@ -406,7 +422,13 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
               {entry.content}
             </p>
             {entry.image_url && (
-              <img src={entry.image_url} className="w-full h-auto mb-4 mt-4" />
+              <Image
+                src={entry.image_url}
+                alt={entry.title ?? "image failed to load"}
+                width={500}
+                height={500}
+                className="w-full h-auto mb-4 mt-4"
+              />
             )}
             <div className="flex justify-end">
               <div className="flex-grow">
@@ -453,7 +475,7 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
               </button>
               <button
                 onClick={async () => {
-                  await handleDeleteEntry(entry.id);
+                  await handleDeleteEntry(entry.id, entry.image_url);
                 }}
                 className="text-red-600 hover:text-red-800 text-sm"
               >
