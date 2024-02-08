@@ -13,7 +13,8 @@ export async function addNewEntry(
   userId: string | null | undefined,
   title?: string | null | undefined,
   content?: string | null | undefined,
-  tags?: string[] | null | undefined
+  tags?: string[] | null | undefined,
+  imageUrl?: string | null | undefined
 ) {
   const supabase = await getServerComponentClient();
   const { data, error } = await supabase
@@ -23,6 +24,7 @@ export async function addNewEntry(
       title,
       content,
       tags,
+      image_url: imageUrl,
     })
     .select();
   return { data, error };

@@ -26,17 +26,25 @@ export async function generateMetadata(
           publishedTime: entryData.created_at,
           authors: [user.username],
           tags: entryData.tags,
+          ...(entryData.image_url
+            ? {
+                images: [{ url: entryData.image_url, width: 800, height: 600 }],
+              }
+            : {}),
         },
       };
     }
     return {
-      title: entryData.title,
-      description: entryData.content,
+      title: entryData.title ?? "pezblog: the blog you've always missed",
+      description:
+        entryData.content ??
+        "get started using pezblog today and keep track of what matters.",
     };
   } else {
     return {
-      title: "pezblog",
-      description: "the blog you've always missed",
+      title: "pezblog: the blog you've always missed",
+      description:
+        "get started using pezblog today and keep track of what matters.",
     };
   }
 }
@@ -81,6 +89,12 @@ const PublicEntry = async ({ params }: Props) => {
           <p className="mb-2 flex-grow whitespace-pre-line">
             {entryData.content}
           </p>
+          {entryData.image_url && (
+            <img
+              src={entryData.image_url}
+              className="w-full h-auto mb-4 mt-4"
+            />
+          )}
           <div className="flex justify-start">
             <div className="flex-grow">
               {entryData.tags &&

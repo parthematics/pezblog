@@ -34,6 +34,7 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
   const [username, setUsername] = useState<string | null>(null);
   const [isPromptLoading, setIsPromptLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [editedEntryTuple, setEditedEntryTuple] = useState<
     [number | null, number | null]
   >([null, null]);
@@ -100,18 +101,6 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
     }
   }
 
-  const clearForm = () => {
-    setNewEntryTitle("");
-    setNewEntryContent("");
-    setNewEntryTags("");
-    setEditedEntryTuple([null, null]);
-    setIsEditing(false);
-    const textArea = textAreaRef.current;
-    if (textArea) {
-      textArea.style.height = "auto";
-    }
-  };
-
   // Handle new entry submission
   const handleNewEntrySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,7 +112,8 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
       user?.id,
       newEntryTitle,
       newEntryContent,
-      newEntryTags ? stringToList(newEntryTags) : []
+      newEntryTags ? stringToList(newEntryTags) : [],
+      imageUrl
     );
 
     if (error) {
@@ -251,6 +241,43 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
     }
   };
 
+  const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const result = await response.json();
+      if (result.error) {
+        throw new Error(result.error);
+      } else {
+        const imageUrl = result.url;
+        setImageUrl(imageUrl);
+      }
+    } catch (error) {
+      console.error("Error uploading image: ", error);
+    }
+  };
+
+  const clearForm = () => {
+    setNewEntryTitle("");
+    setNewEntryContent("");
+    setNewEntryTags("");
+    setEditedEntryTuple([null, null]);
+    setIsEditing(false);
+    setImageUrl(null);
+    const textArea = textAreaRef.current;
+    if (textArea) {
+      textArea.style.height = "auto";
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center space-y-8 px-4">
       <h1 className="text-2xl font-bold mt-6 -mb-5">
@@ -291,8 +318,36 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
             setNewEntryTags(e.target.value);
           }}
           placeholder="tags (optional, space separated)"
-          className="px-4 py-2 border rounded w-full md:w-2/3 mb-8"
+          className="px-4 py-2 border rounded w-full md:w-2/3 mb-4"
         />
+        <div className="text-center mb-5">
+          {!imageUrl && (
+            <button
+              type="button"
+              className="underline text-blue-600 hover:text-blue-800 focus:outline-none focus:shadow-outline"
+              onClick={() => document.getElementById("fileInput")?.click()}
+              disabled={imageUrl !== null}
+            >
+              upload image (optional)
+            </button>
+          )}
+          <input
+            type="file"
+            id="fileInput"
+            accept="image/png, image/jpg, image/jpeg, .heic"
+            onChange={handleImageUpload}
+            className="hidden"
+            disabled={imageUrl !== null}
+          />
+          {imageUrl && (
+            <a
+              href={imageUrl}
+              className="underline text-gray-600 hover:text-gray-800"
+            >
+              image uploaded!
+            </a>
+          )}
+        </div>
         <div className="justify-center">
           <button
             type="submit"
@@ -343,6 +398,9 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
             <p className="mb-2 flex-grow whitespace-pre-line">
               {entry.content}
             </p>
+            {entry.image_url && (
+              <img src={entry.image_url} className="w-full h-auto mb-4 mt-4" />
+            )}
             <div className="flex justify-end">
               <div className="flex-grow">
                 {entry.tags &&

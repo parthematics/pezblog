@@ -7,6 +7,7 @@ export interface BlogEntry {
   title: string | null;
   user_auth_id: string | null;
   tags: string[] | null;
+  image_url: string | null;
 }
 
 export interface User {
