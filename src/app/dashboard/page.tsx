@@ -1,6 +1,5 @@
 "use server";
 
-// import DashboardPage from "@/app/dashboard/dashboard";
 import { getServerComponentClient } from "@/app/server";
 import dynamic from "next/dynamic";
 

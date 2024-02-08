@@ -15,12 +15,12 @@ import {
   deleteImage,
   makeEntryPublic,
   associateEntryWithSharedUid,
-  getSharedEntryUidIfPresent,
   getUsernameFromAuthId,
   calculateStreak,
   copyToClipboard,
   stringToList,
   generatePrompt,
+  hashCode,
   type BlogEntry,
 } from "@/app/server";
 import { User as SupabaseUser } from "@supabase/auth-helpers-nextjs";
@@ -214,12 +214,10 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
     });
   };
 
-  const handleShareEntry = async (entryId: number) => {
+  const handleShareEntry = async (entryId: number, timestamp: string) => {
     const baseUrl = `${window.location.protocol}//${window.location.host}`;
-    const existingSharingUid = await getSharedEntryUidIfPresent(entryId);
-    const sharingUid = !existingSharingUid
-      ? Math.random().toString(36).substring(2, 15)
-      : existingSharingUid;
+    // quickly generate a unique id for the entry to be shared (don't reveal the actual entry id)
+    const sharingUid = hashCode(user?.id + timestamp);
     const shareableLink = `${baseUrl}/dashboard/entry/${sharingUid}`;
     // copy link to clipboard first bc Apple devices have specific requirements
     copyToClipboard(shareableLink).then(
@@ -230,22 +228,19 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
         console.error("Could not copy link: ", err);
       }
     );
-    // If the entry hasn't been shared before, mark it as public and associate it with the sharing uid
-    if (!existingSharingUid) {
-      const { error: publicError } = await makeEntryPublic(entryId);
-      if (publicError) {
-        console.error("Error marking entry as public: ", publicError);
-      } else {
-        const { error: sharingError } = await associateEntryWithSharedUid(
-          sharingUid,
-          entryId
+    const { error: publicError } = await makeEntryPublic(entryId);
+    if (publicError) {
+      console.error("Error marking entry as public: ", publicError);
+    } else {
+      const { error: sharingError } = await associateEntryWithSharedUid(
+        sharingUid,
+        entryId
+      );
+      if (sharingError) {
+        console.error(
+          "Error associating entry with sharing uid: ",
+          sharingError
         );
-        if (sharingError) {
-          console.error(
-            "Error associating entry with sharing uid: ",
-            sharingError
-          );
-        }
       }
     }
   };
@@ -467,7 +462,7 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
               </button>
               <button
                 onClick={async () => {
-                  await handleShareEntry(entry.id);
+                  await handleShareEntry(entry.id, entry.created_at);
                 }}
                 className="text-blue-600 hover:text-blue-800 text-sm pr-2"
               >

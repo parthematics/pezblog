@@ -3,7 +3,7 @@ import dynamic from "next/dynamic";
 
 const Navbar = dynamic(() => import("@/app/navbar"));
 
-export default async function SignupLayout({
+export async function SignupLayout({
   children,
 }: {
   children: React.ReactNode;

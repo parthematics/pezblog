@@ -44,7 +44,6 @@ export const copyToClipboard = async (text: string): Promise<void> => {
   }
   // fallback for older browsers
   else {
-    console.log("fallback for older browsers!");
     const textArea = document.createElement("textarea");
     textArea.value = text;
     // Style the textarea to be unobtrusive
@@ -68,6 +67,19 @@ export const copyToClipboard = async (text: string): Promise<void> => {
       }
     });
   }
+};
+
+// Taken from https://stackoverflow.com/questions/6122571/simple-non-secure-hash-function-for-javascript
+export const hashCode = (str: string): string => {
+  let hash = 0;
+  for (let i = 0, len = str.length; i < len; i++) {
+    const chr = str.charCodeAt(i);
+    hash = (hash << 5) - hash + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  // Ensure hash is positive & format as hex
+  const hashStr = Math.abs(hash).toString(16);
+  return hashStr.padStart(8, "0"); // Pad to ensure consistent length
 };
 
 export const stringToList = (str: string): string[] => {

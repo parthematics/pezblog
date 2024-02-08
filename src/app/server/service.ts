@@ -1,9 +1,10 @@
 "use server";
 
-import { type Database } from "@/app/server";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { cache } from "react";
+
+import { type Database } from "@/app/server";
 
 export const getServerComponentClient = cache(async () => {
   return createServerComponentClient<Database>({ cookies });
@@ -108,24 +109,9 @@ export async function associateEntryWithSharedUid(
   const supabase = await getServerComponentClient();
   const { data, error } = await supabase
     .from("shared_entries")
-    .insert({ uid: sharingUid, entry_id: entryId })
+    .upsert({ uid: sharingUid, entry_id: entryId })
     .select();
   return { data, error };
-}
-
-export async function getSharedEntryUidIfPresent(entryId: number) {
-  const supabase = await getServerComponentClient();
-  const { data, error } = await supabase
-    .from("shared_entries")
-    .select("uid")
-    .eq("entry_id", entryId)
-    .limit(1)
-    .single();
-  if (error) {
-    console.error("Error getting shared entry: ", error);
-    return null;
-  }
-  return data.uid;
 }
 
 export async function getEntryUsingSharedUid(sharingUid: string) {
