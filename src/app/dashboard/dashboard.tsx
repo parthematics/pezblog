@@ -35,6 +35,7 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
   const [isPromptLoading, setIsPromptLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageUploadLoading, setImageUploadLoading] = useState(false);
   const [editedEntryTuple, setEditedEntryTuple] = useState<
     [number | null, number | null]
   >([null, null]);
@@ -249,6 +250,7 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
     formData.append("file", file);
 
     try {
+      setImageUploadLoading(true);
       const response = await fetch("/upload", {
         method: "POST",
         body: formData,
@@ -259,6 +261,7 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
       } else {
         const imageUrl = result.url;
         setImageUrl(imageUrl);
+        setImageUploadLoading(false);
       }
     } catch (error) {
       console.error("Error uploading image: ", error);
@@ -328,7 +331,11 @@ export default function DashboardPage({ user }: { user: SupabaseUser | null }) {
               onClick={() => document.getElementById("fileInput")?.click()}
               disabled={imageUrl !== null}
             >
-              upload image (optional)
+              {imageUploadLoading ? (
+                <i className="fas fa-spinner fa-spin"></i>
+              ) : (
+                "upload image (optional)"
+              )}
             </button>
           )}
           <input

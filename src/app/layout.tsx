@@ -41,10 +41,6 @@ export default function RootLayout({
           rel="apple-touch-icon"
           href="https://pezblog.vercel.app/logo192.png"
         />
-        <meta
-          property="twitter:image"
-          content="https://metatags.io/images/meta-tags.png"
-        />
         <link
           rel="stylesheet"
           href={`https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap`}
