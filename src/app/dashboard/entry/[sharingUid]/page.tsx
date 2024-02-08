@@ -30,7 +30,7 @@ export async function generateMetadata(
             ? {
                 images: [{ url: entryData.image_url, width: 800, height: 600 }],
               }
-            : {}),
+            : { images: "https://pezblog.vercel.app/logo192.png" }),
         },
       };
     }
